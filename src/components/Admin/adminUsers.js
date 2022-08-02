@@ -1,8 +1,8 @@
-import axios from 'axios';
-import config from '../../config';
-import React, { useState, useEffect } from 'react';
-import { withRouter } from 'react-router-dom';
-import CreateSection from './Sections/CreateSections';
+import axios from "axios";
+import config from "../../config";
+import React, { useState, useEffect } from "react";
+import { withRouter } from "react-router-dom";
+import CreateSection from "./Sections/CreateSections";
 import {
   Grid,
   Typography,
@@ -17,14 +17,14 @@ import {
   TableBody,
   Table,
   TableHead,
-} from '@mui/material';
-import { styled } from '@mui/material/styles';
+} from "@mui/material";
+import { styled } from "@mui/material/styles";
 
 // Style table header
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
-    backgroundColor: '#78C6A3',
-    color: '#26532b',
+    backgroundColor: "#78C6A3",
+    color: "#26532b",
     fontSize: 18,
   },
   [`&.${tableCellClasses.body}`]: {
@@ -34,11 +34,11 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
 
 // Style Table Rows
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  '&:nth-of-type(odd)': {
-    backgroundColor: '#FDFCDC',
+  "&:nth-of-type(odd)": {
+    backgroundColor: "#FDFCDC",
   },
   // hide last border
-  '&:last-child td, &:last-child th': {
+  "&:last-child td, &:last-child th": {
     border: 0,
   },
 }));
@@ -54,9 +54,9 @@ function User(props) {
     axios.get(config.SERVER_URL + `/api/admin/users`).then((res) => res.data);
   };
 
-  const promoteRequest = (UID) => {
+  const promoteRequest = (id) => {
     axios
-      .post(config.SERVER_URL + `/api/admin/promote`, UID)
+      .post(config.SERVER_URL + `/api/admin/promote`, { id })
       .then((res) => {
         alert(res.data);
         window.location.reload();
@@ -64,9 +64,9 @@ function User(props) {
       .catch((err) => alert(err.message));
   };
 
-  const demoteRequest = (UID) => {
+  const demoteRequest = (id) => {
     axios
-      .post(config.SERVER_URL + `/admin/api/demote`, UID)
+      .post(config.SERVER_URL + `/api/admin/demote`, { id })
       .then((res) => {
         alert(res.data);
         window.location.reload();
@@ -83,13 +83,13 @@ function User(props) {
           {data.admin && !data.superAdmin && <>Admin</>}
           {data.superAdmin && data.admin && <>Super Admin</>}
         </TableCell>
-        <TableCell>{data.section ? <>{data.section}</> : 'N/A'}</TableCell>
+        <TableCell>{data.section ? <>{data.section}</> : "N/A"}</TableCell>
         <TableCell>
           <Button
             size="small"
             variant="outlined"
             color="success"
-            onClick={() => promoteRequest(data['_id'])}
+            onClick={() => promoteRequest(data["_id"])}
           >
             Promote
           </Button>
@@ -99,7 +99,7 @@ function User(props) {
             size="small"
             variant="outlined"
             color="error"
-            onClick={() => demoteRequest(data['_id'])}
+            onClick={() => demoteRequest(data["_id"])}
           >
             Demote
           </Button>
@@ -117,7 +117,7 @@ const AdminUsers = (props) => {
   useEffect(() => {
     function getUser() {
       axios
-        .get(config.SERVER_URL + '/api/admin/users/')
+        .get(config.SERVER_URL + "/api/admin/users/")
         .then((res) => setUsers(res.data.allUsers.reverse()))
         .catch((err) => console.log(err));
     }
@@ -142,7 +142,7 @@ const AdminUsers = (props) => {
                       variant="h6"
                       sx={{
                         fontWeight: 500,
-                        fontFamily: 'Gill Sans',
+                        fontFamily: "Gill Sans",
                       }}
                     >
                       User Name
