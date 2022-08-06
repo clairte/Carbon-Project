@@ -19,6 +19,7 @@ import {
   TableHead,
   FormControl,
   MenuItem,
+  Select,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
@@ -52,22 +53,29 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 function User(props) {
   const { data } = props;
 
-  const handleSectionChange = (id) => {
-    axios.post(config.SERVER_URL + `/api/admin/assign`, {
-      id: id,
-    })
-    .then((res) => {
-      alert(res.data);
-      window.location.reload();
-    })
-    .catch((err) => alert(err.message));
+  const handleSectionChange = (e, menuData) => {
+    console.log(props.sectionChoices);
+    console.log(menuData.props.value);
+    console.log(props.sectionChoices.filter(section => {return section.sectionName === menuData.props.value}));
+    
+    axios
+      .post(config.SERVER_URL + `/api/section/assign`, {
+        sectionId: props.sectionChoices.filter(section => {return section.sectionName === menuData.props.value})[0]['_id'],
+        userId: data['_id'],
+      })
+      .then((res) => {
+        alert(res.data);
+        window.location.reload();
+      })
+      .catch((err) => alert(err.message));
   };
 
-  const sectionChoice = Object.entries(sectionChoices).map(([key,value]) => (
-    <MenuItem key={key} value={value}>
-      {value}
+  console.log(props.sectionChoices);
+  const sectionChoice = Object.entries(props.sectionChoices).map((section) => (
+    <MenuItem key={section['_id']} value={section.sectionName}>
+      {section.sectionName}
     </MenuItem>
-  ))
+  ));
 
   const promoteRequest = (id) => {
     axios
@@ -99,17 +107,20 @@ function User(props) {
           {data.superAdmin && data.admin && <>Super Admin</>}
         </TableCell>
         <TableCell>
-          
           <FormControl size="small" sx={{ m: 1, minWidth: 120 }}>
-            <Select value={hello} onChange={handleSectionChange}>
-              <MenuItem value={10}>dsf</MenuItem>
+            <Select value={0} onChange={handleSectionChange}>
+              {props.sectionChoices.map((section) => {
+                return (
+                  <MenuItem key={section['_id']} value={section.sectionName}>
+                    {section.sectionName}
+                  </MenuItem>
+                );
+              })}
             </Select>
           </FormControl>
-      
-          
-          
+
           {/* {data.section ? <>{data.section}</> : 'N/A'} */}
-          </TableCell>
+        </TableCell>
         <TableCell>
           <Button
             size="small"
@@ -144,7 +155,7 @@ const AdminUsers = (props) => {
   useEffect(() => {
     function getSection() {
       axios
-        .get(config.SERVER_URL + '/api/admin/sections')
+        .get(config.SERVER_URL + '/api/section/sections')
         .then((res) => {
           setSections(res.data.allSections);
         })
@@ -204,6 +215,7 @@ const AdminUsers = (props) => {
                       key={index}
                       data={user}
                       handleUpdateUser={handleUpdateUser}
+                      sectionChoices={sections}
                     />
                   );
                 })}
