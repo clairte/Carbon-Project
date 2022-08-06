@@ -17,6 +17,7 @@ const userSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    section: { type: mongoose.Schema.Types.ObjectId, ref: "Section", default: null },
   },
   { timestamps: true, strict: false }
 );

@@ -10,8 +10,9 @@ const webpack = require("webpack");
 const sessions = require("./routes/session");
 const auth = require("./routes/auth");
 const api = require("./routes/api/index");
+
 const router = require("./routes");
-const { isAuthenticated } = require("./controllers/auth");
+const { isAuthenticated } = require("./controllers/adminController");
 
 const webpackDevMiddleware = require("webpack-dev-middleware");
 const webpackConfig = require("../webpack.dev.js");

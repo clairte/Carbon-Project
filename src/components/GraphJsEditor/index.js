@@ -28,10 +28,10 @@ const Editor = () => {
         },
 
         // test purpose, need to change to project endpoint
-        urlStore: config.SERVER_URL + `/api/grapesStorage/storage/${id}`,
+        urlStore: config.SERVER_URL + `/api/projects/${id}`,
 
         // comment out for now because we don't have anything to load yet
-        // urlLoad: config.SERVER_URL + "/api/grapesStorage/storage",
+        urlLoad: config.SERVER_URL + `/api/projects/${id}`,
       },
     });
     setEditor(gEditor);

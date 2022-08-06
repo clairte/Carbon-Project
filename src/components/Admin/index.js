@@ -1,96 +1,89 @@
+import { hot } from "react-hot-loader/root";
 import React from "react";
-import styled from 'styled-components'
-import { NavLink } from "react-router-dom";
-import { CreateTable } from "../Shared/Table";
+import { Switch, Route, Link } from "react-router-dom";
 import axios from "axios";
-const getUsers = () => (axios.get(`http://localhost:3000/api/projects/users`).then(res => res.data));
-const promoteRequest = (UID) => (axios.post(`http://localhost:3000/api/projects/promote`, UID).then(res => res.data));
-const demoteRequest = (UID) => (axios.post(`http://localhost:3000/api/demote`, UID).then(res => res.data));
 
-const StingText = `🐝 Buzzzzz
-You’ve been stung to update something on Buzz! Take a look at https://buzz.dailybruin.com.`;
+//import material ui stuffes
+import { Box, Grid, Paper } from "@mui/material";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
 
-class AdminPage extends React.PureComponent {
-  constructor(props) {
-    super(props);
-    this.state = {
-      data: [],
-      loading: true
-    };
-    this.transformData = this.transformData.bind(this);
-    this.tagline = this.tagline.bind(this);
-    this.sting = this.sting.bind(this);
-    this.promote = this.promote.bind(this);
-    this.demote = this.demote.bind(this); 
-  }
+//import AdminPage from "./components/Admin";
+import GroupWorkIcon from "@mui/icons-material/GroupWork";
+import PeopleIcon from "@mui/icons-material/People";
+import WebIcon from "@mui/icons-material/Web";
+import AdminProjects from "./adminProjects";
+import AdminUsers from "./adminUsers";
 
-  componentDidMount() {
-    getUsers().then(res => {
-      console.log(res);
-      const data = this.transformData(res);
-      this.setState({
-        data,
-        loading: false
-      })
-    })
-  }
+import config from "../../config";
+import AdminSection from "./adminSections";
 
-  tagline(someone) {
-    if (someone.twitter && someone.twitter!="") {
-      return `Email ${someone.lastName} at ${someone.slug}@dailybruin.com or tweet @${someone.twitter}.`
+const AdminPage = () => {
+  const [adminTabIndex, setAdminTabIndex] = React.useState(
+    localStorage.getItem("adminTab") !== null
+      ? parseInt(localStorage.getItem("adminTab"))
+      : 0
+  );
+  const [isAdmin, setIsAdmin] = React.useState(0);
+
+  const handleAdminTabIndexChange = (event, newIndex) => {
+    localStorage.setItem("adminTab", newIndex);
+    setAdminTabIndex(newIndex);
+  };
+
+  axios.get(config.SERVER_URL + `/api/admin/is_admin`).then((res) => {
+    if (res.data.isAdmin) {
+      setIsAdmin(1);
     }
-    return `Email ${someone.lastName} at ${someone.slug}@dailybruin.com.`
-  }
+    console.log("is admin: ", isAdmin);
+  });
 
-  transformData(data) {
-    return data.allUsers.map(x => ({
-      email: x.email,
-      userId: x._id
-    }))
-  }
+  console.log(adminTabIndex);
 
-  promote(someone){
-    console.log('you just got promoted! :P')
-    console.log(someone)
-    promoteRequest({id: someone}).then(data => console.log(data))
-    window.location.reload()
-  }
+  return (
+    <div className="AdminPage">
+      <Grid container direction="row" justify="center" alignItems="stretch">
+        <Grid Item xs={12}>
+          <Route path="/">
+            {isAdmin ? (
+              <Tabs
+                value={adminTabIndex}
+                onChange={handleAdminTabIndexChange}
+                centered
+              >
+                <Tab
+                  icon={<WebIcon />}
+                  label="Manage Projects"
+                  component={Link}
+                  to="/admin/adminProjects"
+                />
+                <Tab
+                  icon={<PeopleIcon />}
+                  label="Manage Users"
+                  component={Link}
+                  to="/admin/adminUsers"
+                />
+                <Tab
+                  icon={<GroupWorkIcon />}
+                  label="Manage Sections"
+                  component={Link}
+                  to="/admin/adminSections"
+                />
+              </Tabs>
+            ) : null}
+          </Route>
+        </Grid>
+        <Grid item xs={12}>
+          <Switch>
+            {/* <Route exact path="/" component={AdminPage} /> */}
+            <Route path="/admin/adminProjects" component={AdminProjects} />
+            <Route path="/admin/adminUsers" component={AdminUsers} />
+            <Route path="/admin/adminSections" component={AdminSection} />
+          </Switch>
+        </Grid>
+      </Grid>
+    </div>
+  );
+};
 
-  demote(someone){
-    console.log('you just got demoted~ :(')
-    console.log(someone)
-    demoteRequest({id: someone}).then(data => console.log(data))
-    window.location.reload()
-  }
-
-  sting(someone) {
-    stingMember(someone._id);
-  }
-
-  render() {
-    if (this.state.loading) {
-      return null;
-    }
-
-    return (
-      <>
-        <h1 style={{margin: '1em'}}>Admin Page</h1>
-        <Button> <NavLink style={{textDecoration: 'none', color: 'black'}} to='/'> Home </NavLink> </Button>
-        <h2 style={{margin: '1.2em'}}>Staff List</h2>
-        <div style={{margin: '1.7em'}}>
-          {CreateTable(this.state.data, ["email"], this.promote, undefined, this.demote)}
-          </div>
-      </>
-    )
-  }
-}
-
-const Button = styled.button`
-   background-color: white;
-   color: black;
-   padding: 1em;
-   cursor: pointer;
-   margin-left: 2em;
-`
-
-export default AdminPage; 
+export default hot(AdminPage);

@@ -2,20 +2,13 @@ version: "3"
 
 services:
   web:
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile.dev
     image: buzz
     env_file: .env
     ports:
       - "3000:3000"
-    links:
-      - db_mongo
     volumes:
       - ./server:/usr/src/app/server:rw,cached # backend code
       - ./src:/usr/src/app/src:rw,cached # frontend code
-  db_mongo:
-    image: mongo
-    ports:
-      - "27018:27017"
-    command: --quiet --logpath /dev/null 
