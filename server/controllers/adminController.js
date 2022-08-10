@@ -6,6 +6,36 @@ const SectionModel = require("../db/models/Section");
 const { User } = require("../db");
 const { Section } = require("../db");
 
+const AWS = require('aws-sdk');
+
+const s3 = new AWS.S3({
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+});
+
+const uploadFile = (fileContent, fileName) => {
+  let fileHtml = '<!doctype html><html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="./css/style.css">' + fileContent['gjs-html'];
+
+  // console.log(fileHtml);
+
+  // Setting up S3 upload parameters
+  const params = {
+      ACL: 'public-read',
+      ContentType: 'text/html',
+      Bucket: 'carbonprojects',
+      Key: `${fileName}/index.html`,
+      Body: fileHtml
+  };
+
+  // Uploading files to the bucket
+  s3.upload(params, function(err, data) {
+      if (err) {
+          console.log(err);
+      }
+      console.log(`File uploaded successfully. ${data.Location}`);
+  });
+};
+
 const isAuthenticated = async (req, res, next) => {
   // req.isAuthenticated() is a method passed from the passport
   // authentication that we can use to check whether
@@ -136,73 +166,6 @@ const demote = async (req, res, next) => {
   }
 };
 
-const createSection = async (req, res) => {
-  try {
-    // re.user.admin will not work in Postman, try to figure it out
-    // if (req.user.admin || req.user.superAdmin) {
-    //   const { sectionName } = req.body;
-    //   const newSection = new Section({ sectionName });
-    //   await newSection.save();
-
-    //   res.status(200).json({ message: "New section created", section: newSection });
-    // } else {
-    //   res.status(401).json({ message: "Unauthorized: you are not an admin" });
-    // }
-    const { sectionName } = req.body;
-    const newSection = new Section({ sectionName });
-    await newSection.save();
-
-    res
-      .status(200)
-      .json({ message: "New section created", section: newSection });
-  } catch (error) {
-    res.status(500).json({ error, message: "Failed to create section" });
-  }
-};
-
-const deleteSection = async (req, res) => {
-  try {
-    // if (req.user.admin || req.user.superAdmin) {
-    //   SectionModel.findByIdAndDelete(req.params.sectionid, (err) => {
-    //     if (err) {
-    //       console.log(err);
-    //       res.status(400).json("Failed to delete section");
-    //     }
-    //     res.status(200).json("Successfully deleted section");
-    //   });
-    // } else {
-    //   res.status(401).json({ message: "Unauthorized: you are not an admin" });
-    // }
-    SectionModel.findByIdAndDelete(req.params.sectionid, (err) => {
-      if (err) {
-        console.log(err);
-        res.status(400).json("Failed to delete section");
-      }
-      res.status(200).json("Successfully deleted section");
-    });
-  } catch (error) {
-    res.status(500).json({ error, message: "Failed to delete section" });
-  }
-};
-
-const getAllSections = async (req, res) => {
-  try {
-    let allSections = await SectionModel.find();
-
-    // if (req.user.admin || req.user.superAdmin) {
-    //   allSections = await SectionModel.find();
-    // } else {
-    //   res.status(401).json({ message: "Unauthorized: you are not an admin" });
-    // }
-
-    res.status(200).json({
-      allSections,
-    });
-  } catch (error) {
-    res.status(500).json({ error, message: "Failed to get all sections" });
-  }
-};
-
 //Admin Powers: Approving, Denying, Changes Requested, and Draft
 
 const approve = async (req, res, next) => {
@@ -213,6 +176,7 @@ const approve = async (req, res, next) => {
 
     project.isApproved = true;
     project.status = "Approved";
+    uploadFile(project.content, project.name);
     await project.save();
 
     res.status(200).json({ message: "Project has been approved" });
@@ -255,44 +219,6 @@ const changesRequested = async (req, res, next) => {
   }
 };
 
-// to be tested and wait for implementation of section shcema
-const assignSection = async (req, res, next) => {
-  try {
-    const { userId, sectionId } = req.body;
-    const user = await UserModel.findById(userId);
-    const section = await SectionModel.findById(sectionId);
-
-    user.sections.push(section._id);
-    section.owner = user._id;
-
-    await user.save();
-    await section.save();
-  } catch (error) {
-    res.status(500).json({ error, message: "Fail to assign user to section" });
-  }
-};
-
-// to be tested and wait for implementation of section shcema
-const removeSection = async (req, res, next) => {
-  try {
-    const { userId, sectionId } = req.body;
-    const user = await UserModel.findById(userId);
-    const section = await SectionModel.findById(sectionId);
-
-    let updatedSections = user.sections.filter((currSectionId) => {
-      return String(currSectionId) !== sectionId;
-    });
-    user.sections = updatedSections;
-
-    section.owner = null;
-
-    await user.save();
-    await section.save();
-  } catch (error) {
-    res.status(500).json({ error, message: "Fail to assign user to section" });
-  }
-};
-
 module.exports = {
   isAuthenticated,
   checkAdmin,
@@ -305,10 +231,5 @@ module.exports = {
   demote,
   approve,
   deny,
-  createSection,
-  deleteSection,
-  getAllSections,
-  assignSection,
-  removeSection,
   changesRequested,
 };

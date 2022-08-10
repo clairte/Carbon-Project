@@ -1,8 +1,8 @@
 import axios from "axios";
 import config from "../../config";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { withRouter } from "react-router-dom";
-import CreateSection from "./Sections/CreateSections";
+import CreateSection from "./Sections/CreateSections"
 import {
   Grid,
   Typography,
@@ -17,13 +17,9 @@ import {
   TableBody,
   Table,
   TableHead,
-  FormControl,
-  MenuItem,
-  Select,
 } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { styled } from '@mui/material/styles';
 
-// Style table header
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
     backgroundColor: "#78C6A3",
@@ -35,175 +31,46 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
   },
 }));
 
-// Style Table Rows
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  "&:nth-of-type(odd)": {
+  '&:nth-of-type(odd)': {
     backgroundColor: "#FDFCDC",
   },
   // hide last border
-  "&:last-child td, &:last-child th": {
+  '&:last-child td, &:last-child th': {
     border: 0,
   },
 }));
 
-/**
- * Component Declaration
- **/
+const getUsers = () =>
+  axios.get(config.SERVER_URL + `/api/admin/users`).then((res) => res.data);
+const promoteRequest = (UID) =>
+  axios
+    .post(config.SERVER_URL + `/api/admin/promote`, UID)
+    .then((res) => res.data);
+const demoteRequest = (UID) =>
+  axios
+    .post(config.SERVER_URL + `/admin/api/demote`, UID)
+    .then((res) => res.data);
 
-function User(props) {
-  const { data, sectionChoices } = props;
-  const sectionName = sectionChoices.filter(
-    (section) => section["_id"] === data.section
-  )[0]
-    ? sectionChoices.filter((section) => section["_id"] === data.section)[0]
-        .sectionName
-    : "";
-
-  const handleSectionChange = (e, menuData) => {
-    axios
-      .post(config.SERVER_URL + `/api/section/assign`, {
-        sectionId: sectionChoices.filter((section) => {
-          return section.sectionName === menuData.props.value;
-        })[0]["_id"],
-        userId: data["_id"],
-      })
-      .then((res) => {
-        alert(res.data);
-        window.location.reload();
-      })
-      .catch((err) => alert(err.message));
-  };
-
-  const promoteRequest = (id) => {
-    axios
-      .post(config.SERVER_URL + `/api/admin/promote`, { id })
-      .then((res) => {
-        alert(res.data);
-        window.location.reload();
-      })
-      .catch((err) => alert(err.message));
-  };
-
-  const demoteRequest = (id) => {
-    axios
-      .post(config.SERVER_URL + `/api/admin/demote`, { id })
-      .then((res) => {
-        alert(res.data);
-        window.location.reload();
-      })
-      .catch((err) => alert(err.message));
-  };
-
-  console.log(sectionName);
-
-  return (
-    <>
-      <TableRow>
-        <TableCell>{data.email}</TableCell>
-        <TableCell>
-          {!data.admin && !data.superAdmin && <>Member</>}
-          {data.admin && !data.superAdmin && <>Admin</>}
-          {data.superAdmin && data.admin && <>Super Admin</>}
-        </TableCell>
-        <TableCell>
-          <FormControl size="small" sx={{ m: 1, minWidth: 120 }}>
-            <Select
-              value={sectionName ? sectionName : ""}
-              onChange={handleSectionChange}
-              inputProps={{ "aria-label": "Without label" }}
-            >
-              {sectionChoices.map((section) => {
-                return (
-                  <MenuItem key={section["_id"]} value={section.sectionName}>
-                    {section.sectionName}
-                  </MenuItem>
-                );
-              })}
-            </Select>
-          </FormControl>
-
-          {/* {data.section ? <>{data.section}</> : 'N/A'} */}
-        </TableCell>
-        <TableCell>
-          <Button
-            size="small"
-            variant="outlined"
-            color="success"
-            onClick={() => promoteRequest(data["_id"])}
-          >
-            Promote
-          </Button>
-        </TableCell>
-        <TableCell>
-          <Button
-            size="small"
-            variant="outlined"
-            color="error"
-            onClick={() => demoteRequest(data["_id"])}
-          >
-            Demote
-          </Button>
-        </TableCell>
-      </TableRow>
-    </>
-  );
-}
-
-// Component Declaration
-
-const AdminUsers = (props) => {
-  const [users, setUsers] = useState([]);
-  const [sections, setSections] = useState([]);
-
-  useEffect(() => {
-    function getSection() {
-      axios
-        .get(config.SERVER_URL + "/api/section/sections")
-        .then((res) => {
-          setSections(res.data.allSections);
-        })
-        .catch((err) => console.log(err));
-    }
-    getSection();
-  }, []);
-
-  useEffect(() => {
-    function getUser() {
-      axios
-        .get(config.SERVER_URL + "/api/admin/users/")
-        .then((res) => setUsers(res.data.allUsers.reverse()))
-        .catch((err) => console.log(err));
-    }
-    getUser();
-  }, []);
-
-  const handleUpdateUser = () => {
-    console.log(users);
-    setUsers([...users]);
-  };
-
-  const handleUpdateSection = () => {
-    setSections(sections.map());
-  };
-
-  return (
-    <>
-      <Grid Container spacing={2}>
-        <Container sx={{ p: 2 }}>
+    const AdminUsers= (props) => {
+      return (
+        <>
+        <Grid Container spacing={2} >
+        <Container
+        sx={{p: 2}}>
           <TableContainer component={Paper}>
             <Table>
               <TableHead>
                 <TableRow>
                   <StyledTableCell>
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        fontWeight: 500,
-                        fontFamily: "Gill Sans",
-                      }}
-                    >
-                      User Name
-                    </Typography>
+                  <Typography variant = "h6"
+                  sx= {{
+                    fontWeight: 500,
+                    fontFamily: "Gill Sans",
+                  }}
+                  >
+                  User Name
+                  </Typography>
                   </StyledTableCell>
                   <StyledTableCell>Position</StyledTableCell>
                   <StyledTableCell>Section</StyledTableCell>
@@ -212,23 +79,15 @@ const AdminUsers = (props) => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {users.map((user, index) => {
-                  return (
-                    <User
-                      key={index}
-                      data={user}
-                      handleUpdateUser={handleUpdateUser}
-                      sectionChoices={sections}
-                    />
-                  );
-                })}
+              <StyledTableRow>
+                </StyledTableRow>
               </TableBody>
             </Table>
           </TableContainer>
         </Container>
-      </Grid>
-    </>
-  );
-};
+        </Grid>
+        </>
+      );
+    }
 
 export default withRouter(AdminUsers);
