@@ -19,8 +19,10 @@ import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import { Avatar } from "@mui/material";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { UserProfile } from "./components/UserProfile";
+import ArticleIcon from '@mui/icons-material/Article';
 
 import Dashboard from "./components/Dashboard";
+import TemplateList from "./components/TemplateList";
 import GrapesJsEditor from "./components/GraphJsEditor";
 import AdminPage from "./components/Admin";
 
@@ -136,6 +138,12 @@ const App = () => {
                   component={Link}
                   to="/"
                 />
+                <Tab
+                icon={<ArticleIcon />}
+                label="Template"
+                component={Link}
+                to="/templates"
+                />
                 {isAdmin ? (
                   <Tab
                     icon={<AdminPanelSettingsIcon />}
@@ -155,6 +163,7 @@ const App = () => {
             <Route path="/edit/:id" component={GrapesJsEditor} />
             <Route path="/admin" component={AdminPage} />
             <Route path="/user" component={UserProfile} />
+            <Route path="/templates" component={TemplateList} />
           </Switch>
         </Grid>
       </Grid>
