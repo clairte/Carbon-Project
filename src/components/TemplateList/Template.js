@@ -35,7 +35,10 @@ export default function Template(props) {
   const { data } = props;
 
   const handleDeleteTemplate = (id) => {
-    axios
+    axios.get(config.SERVER_URL + `/api/admin/is_superAdmin`).then((res) => {
+      console.log(res.data)
+      if (res.data.isSuperAdmin) {
+      axios
       .delete(config.SERVER_URL + `/api/template/${id}`)
       .then((res) => {
         alert(res.data);
@@ -43,6 +46,11 @@ export default function Template(props) {
         setDeleteTemplateModalOpen(false);
       })
       .catch((err) => alert(err.message));
+      }else{
+        alert("You do not have permission to delete template!s")
+      }
+      
+    });
   };
 
   return (
@@ -77,7 +85,7 @@ export default function Template(props) {
         style={modalCustomStyles}
       >
         <p>Are you sure you want to delete this Template?</p>
-        <Buttons onClick={() => handleDeleteTemplate(data["_id"])}>
+        <Buttons onClick={() => handleDeleteTemplate(data['_id'])}>
           Delete
         </Buttons>
         <Buttons onClick={() => setDeleteTemplateModalOpen(false)}>

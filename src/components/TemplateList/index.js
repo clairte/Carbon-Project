@@ -5,7 +5,6 @@ import Temp from './TemplateList';
 const TemplateList = (props) => {
   return (
     <>
-      {/* <Create /> */}
       <Temp />
     </>
   );

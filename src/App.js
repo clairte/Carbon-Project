@@ -28,7 +28,7 @@ import AdminPage from "./components/Admin";
 
 import config from "./config";
 
-import Create from "./components/Dashboard/Create";
+
 
 const App = () => {
   const [tabIndex, setTabIndex] = React.useState(
@@ -129,9 +129,6 @@ const App = () => {
                 onChange={handleTabIndexChange}
                 orientation="vertical"
               >
-                <Grid container justifyContent="center">
-                  <Create />
-                </Grid>
                 <Tab
                   icon={<DashboardIcon />}
                   label="Dashboard"
@@ -140,7 +137,7 @@ const App = () => {
                 />
                 <Tab
                 icon={<ArticleIcon />}
-                label="Template"
+                label="Create Project"
                 component={Link}
                 to="/templates"
                 />

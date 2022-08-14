@@ -3,6 +3,7 @@ import styled from "styled-components";
 import axios from "axios";
 import config from "../../config";
 import Template from "./Template";
+import Stack from '@mui/material/Stack';
 
 //material UI components
 import Table from "@mui/material/Table";
@@ -12,8 +13,10 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import Button from "@mui/material/Button";
 
+import Typography from '@mui/material/Typography';
+import CreateTemplate from "./createTemplate";
+import Create from "../Dashboard/Create.js";
 // Component declaration
 
 const Temp = (props) => {
@@ -37,6 +40,21 @@ const Temp = (props) => {
 
   return (
     <div>
+    
+    <Typography align="center"
+      sx= {{
+        p:2
+      }}
+      >
+      <Stack 
+      spacing={10} 
+      justifyContent="center"
+      alignItems="center"
+      direction="row">
+      <Create />
+    <CreateTemplate />
+    </Stack>
+    </Typography>
       <Header>{templates.length !== 0 && <></>}</Header>
       {templates.length === 0 ? (
         <NoTemplateContainer>
