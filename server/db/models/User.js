@@ -9,6 +9,7 @@ const userSchema = mongoose.Schema(
       id: { type: String, required: [true, "can't be blank"], unique: true },
     },
     projectsCreated: [{ type: mongoose.Schema.Types.ObjectId, ref: "Project" }],
+    templatesCreated: [{ type: mongoose.Schema.Types.ObjectId, ref: "Template" }],
     admin: {
       type: Boolean,
       default: false,
@@ -17,6 +18,7 @@ const userSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    section: { type: mongoose.Schema.Types.ObjectId, ref: "Section", default: null },
   },
   { timestamps: true, strict: false }
 );

@@ -1,6 +1,6 @@
 const path = require("path");
 const Router = require("express-promise-router");
-const { isAuthenticated } = require("../controllers/auth");
+const { isAuthenticated } = require("../controllers/adminController");
 
 const router = new Router();
 

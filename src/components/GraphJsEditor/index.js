@@ -26,12 +26,25 @@ const Editor = () => {
         headers: {
           "Content-Type": "application/json",
         },
+        // Enrich the store call
+        onStore: (data, editor) => {
+          const pagesHtml = editor.Pages.getAll().map(page => {
+            const component = page.getMainComponent();
+            return {
+              html: editor.getHtml({ component }),
+              css: editor.getCss({ component })
+            }
+          });
+          return { id: projectID, data, pagesHtml };
+        },
+        // If on load, you're returning the same JSON from above...
+        onLoad: result => result.data,
 
         // test purpose, need to change to project endpoint
-        urlStore: config.SERVER_URL + `/api/grapesStorage/storage/${id}`,
+        urlStore: config.SERVER_URL + `/api/projects/${id}`,
 
         // comment out for now because we don't have anything to load yet
-        // urlLoad: config.SERVER_URL + "/api/grapesStorage/storage",
+        urlLoad: config.SERVER_URL + `/api/projects/${id}`,
       },
     });
     setEditor(gEditor);

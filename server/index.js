@@ -10,8 +10,9 @@ const webpack = require("webpack");
 const sessions = require("./routes/session");
 const auth = require("./routes/auth");
 const api = require("./routes/api/index");
+
 const router = require("./routes");
-const { isAuthenticated } = require("./controllers/auth");
+const { isAuthenticated } = require("./controllers/adminController");
 
 const webpackDevMiddleware = require("webpack-dev-middleware");
 const webpackConfig = require("../webpack.dev.js");
@@ -44,7 +45,7 @@ app.use(sessions);
 
 // after configuring both passport and session, this middleware basically
 // requires people to login before they can access all the functionalities
-// of carbon/buzz.
+// of carbon.
 app.use(auth);
 
 // API routing

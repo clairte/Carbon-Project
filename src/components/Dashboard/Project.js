@@ -1,10 +1,20 @@
-import React, {useState} from 'react'
-import {useHistory} from "react-router-dom"
-import styled from 'styled-components'
-import Modal from 'react-modal'
-import {mediaQueries} from '../../shared/config'
+import React, { useState } from "react";
+import { useHistory } from "react-router-dom";
+import styled from "styled-components";
+import Modal from "react-modal";
+import { mediaQueries } from "../../shared/config";
+import config from "../../config";
+import { projectStatuses } from "../../shared/ProjectConfig";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import Select from "@mui/material/Select";
 
-import axios from "axios"
+import axios from "axios";
+
+//material UI components
+import TableCell from "@mui/material/TableCell";
+import TableRow from "@mui/material/TableRow";
+import Button from "@mui/material/Button";
 
 /**
  * Component Declaration
@@ -14,85 +24,139 @@ export default function Project(props) {
   const history = useHistory();
 
   const modalCustomStyles = {
-      content : {
-        top                   : '50%',
-        left                  : '50%',
-        right                 : 'auto',
-        bottom                : 'auto',
-        marginRight           : '-50%',
-        transform             : 'translate(-50%, -50%)'
-      }
+    content: {
+      top: "50%",
+      left: "50%",
+      right: "auto",
+      bottom: "auto",
+      marginRight: "-50%",
+      transform: "translate(-50%, -50%)",
+    },
   };
 
-  const {data} = props;
+  const { data } = props;
 
   const handleDeleteProject = (id) => {
-      axios.delete(`http://localhost:3000/api/projects/${id}`)
-          .then(res => {
-              alert(res.data)
-              props.handleUpdateProject()
-              setDeleteProjectModalOpen(false)
-          })
-          .catch(err => alert(err.message))
-  }
+    axios
+      .delete(config.SERVER_URL + `/api/projects/${id}`)
+      .then((res) => {
+        alert(res.data);
+        window.location.reload();
+        setDeleteProjectModalOpen(false);
+      })
+      .catch((err) => alert(err.message));
+  };
+
+  const projectStatusChoice = Object.entries(projectStatuses).map(
+    ([key, value]) => (
+      <MenuItem key={key} value={value}>
+        {value}
+      </MenuItem>
+    )
+  );
+
+  const handleChangeStatus = (event) => {
+    let selectedStatus = event.target.value;
+    let currentStatus = data.status;
+    console.log(selectedStatus + " clicked");
+
+    // only update status when selecting a different one than current
+    if (selectedStatus != currentStatus) {
+      let backendApi;
+      switch (selectedStatus) {
+        case projectStatuses.draft:
+          backendApi = "draft";
+          break;
+        case projectStatuses.readyToView:
+          backendApi = "readyToView";
+          break;
+      }
+      axios
+        .post(config.SERVER_URL + `/api/projects/${backendApi}`, {
+          id: data._id,
+        })
+        .then((res) => {
+          alert(res.data.message);
+          window.location.reload();
+        })
+        .catch((err) => alert(err.message));
+    }
+  };
 
   return (
-      <ProjectContainer>
-          <button onClick={() => setDeleteProjectModalOpen(true)}>Delete</button>
-          <button onClick={() => history.push(`/edit/${data["_id"]}`)}>Edit</button>
-          <Modal
-              isOpen={deleteProjectModalOpen}
-              onRequestClose={() => setDeleteProjectModalOpen(false)}
-              ariaHideApp = {false}
-              style={modalCustomStyles}
+    <>
+      <TableRow>
+        <TableCell>{data.name}</TableCell>
+        <TableCell>
+          {data.status === "Approved" ||
+          data.status === "Denied" ||
+          data.status === "Changes Requested" ? (
+            <div>{data.status}</div>
+          ) : (
+            <FormControl size="small" sx={{ m: 1, minWidth: 120 }}>
+              <Select
+                value={data.status}
+                onChange={handleChangeStatus}
+                inputProps={{ "aria-label": "Without label" }}
+              >
+                {projectStatusChoice}
+              </Select>
+            </FormControl>
+          )}
+        </TableCell>
+        <TableCell>
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={() => history.push(`/edit/${data["_id"]}`)}
+            disabled={
+              data.status === "Approved" || data.status === "Denied"
+                ? true
+                : false
+            }
           >
-              <p>Are you sure you want to delete this project?</p>
-              <button onClick={() => setDeleteProjectModalOpen(false)}>Cancel</button>
-              <button onClick={() => handleDeleteProject(data["_id"])}>Delete</button>
-          </Modal>
-          <TestPreview>
-              <h1>Preview</h1>
-          </TestPreview>
-          <Description>
-              <h3>{data.name}</h3>
-              <h3>Status: {data.status}</h3>
-          </Description>
-      </ProjectContainer>
-  )
+            Edit
+          </Button>
+        </TableCell>
+        <TableCell>
+          <Button
+            size="small"
+            color="error"
+            variant="outlined"
+            onClick={() => setDeleteProjectModalOpen(true)}
+          >
+            Delete
+          </Button>
+        </TableCell>
+      </TableRow>
+      <Modal
+        isOpen={deleteProjectModalOpen}
+        onRequestClose={() => setDeleteProjectModalOpen(false)}
+        ariaHideApp={false}
+        style={modalCustomStyles}
+      >
+        <p>Are you sure you want to delete this project?</p>
+        <Buttons onClick={() => handleDeleteProject(data["_id"])}>
+          Delete
+        </Buttons>
+        <Buttons onClick={() => setDeleteProjectModalOpen(false)}>
+          Cancel
+        </Buttons>
+      </Modal>
+    </>
+  );
 }
 
 /**
  * Styled components declaration
  */
- const ProjectContainer = styled.div`
-    width: 80%;
-    margin: auto;
-    ${mediaQueries.tablet} {
-        width: 90%;
-    }
-    ${mediaQueries.mobile} {
-        width: 80%;
-    }
-`
-
-const TestPreview = styled.div`
-    height: 400px;
-    background: #BBBBBB;
-    position: relative;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 5px 5px 0 0;
-    color: gray;
-`
-
-const Description = styled.div`
-    border-radius: 0 0 5px 5px;
-    color: white;
-    padding: 0.5em 1em 1.5em 1em;
-    background: #333333;
-    display: flex;
-    align-items: center;
-    justify-content: space-between
-`
+const Buttons = styled.button`
+  display: inline-block;
+  border-radius: 3px;
+  padding: 0.5rem 0;
+  margin: 0.5rem 0.2rem;
+  width: 6em;
+  background: white;
+  color: black;
+  border: 2px solid lightblue;
+`;
